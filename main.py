@@ -8,6 +8,9 @@ mydb = mysql.connector.connect(
 )
 mycursor = mydb.cursor()
 
+mycursor.execute("DROP TABLE IF EXISTS bill")
+mycursor.execute("CREATE TABLE IF NOT EXISTS bill(BOOK_NAME VARCHAR(220),PRICE VARCHAR(220))")
+
 def add_book():
     isbn_no = int(input("Enter ISBN no: "))
     name = input("Enter the name of the book: ")
@@ -32,6 +35,7 @@ def show_books():
     myresult = mycursor.fetchall()
     for x in myresult:
         print(x)
+
 def buy_book():
     isbn_no = int(input("Enter the isbn no. of the book: "))
     mycursor.execute("SELECT * FROM book WHERE isbn_no = %s",(isbn_no,))
@@ -47,15 +51,26 @@ def buy_book():
         print("Thank you for your purchase")
         new_quantity = x[3] - quantity
         mycursor.execute("UPDATE book SET quantity = %s WHERE isbn_no = %s",(new_quantity,isbn_no))
+        mycursor.execute("INSERT INTO bill (BOOK_NAME,PRICE) VALUES (%s, %s)",(x[1],x[4]))
         mydb.commit()
-def c
+
+
+def bill_print():
+    print("Thank you for shopping with us")
+    print("Your bill is: ")
+    mycursor.execute("SELECT * FROM bill")
+    myresult = mycursor.fetchall()
+    for x in myresult:
+        print(x)
+
 def start():
     while True:
         print("1. Add a book")
         print("2. Drop a column")
         print("3. Show all books")
         print("4. Buy Book")
-        print("5. Exit")
+        print("5. Print bill")
+        print("6. Exit")
         choice = int(input("Enter your choice: "))
         if choice == 1:
             add_book()
@@ -65,7 +80,9 @@ def start():
             show_books()
         elif choice == 4:
             buy_book()
-        elif choice == 5:   
+        elif choice == 5:
+            bill_print()
+        elif choice == 6:   
             break
         else:
             print("Invalid choice")
